@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  wow:
+  problem-one:
     container_name: wow
     stdin_open: true
     tty: true
@@ -8,6 +8,12 @@ services:
       context: .
     volumes:
       - .:/app
+
+  problem-two:
+    container_name: engine2d
+    build:
+      context: .
+      dockerfile: engine2d.dockerfile
 
   selenium-1:
     image: selenium/node-chrome:latest
