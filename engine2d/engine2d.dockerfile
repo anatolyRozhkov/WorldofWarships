@@ -1,12 +1,20 @@
-# Slim version of Python
-FROM python:3.8.12-slim
+FROM python:3.9-slim
 
-# Download Package Information
-RUN apt-get update -y
+MAINTAINER Anatoly Rozhkov <anatoly.rozhkov1998@gmail.com>
 
-# Install Tkinter
+ENV PYTHONUNBUFFERED 1
+
+COPY ./requirements.txt /tmp/requirements.txt
+
+COPY . /app
+
+RUN python -m venv /py && \
+    /py/bin/pip install --upgrade pip && \
+    apt-get update && \
+    /py/bin/pip install -r /tmp/requirements.txt
+
 RUN apt-get install tk -y
 
-# Commands to run Tkinter application
-CMD ["/app/tkinter_app.py"]
-ENTRYPOINT ["python3"]
+WORKDIR /app
+
+ENV PATH="/py/bin:$PATH"

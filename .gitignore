@@ -4,4 +4,4 @@
 .pytest_cache
 .idea/*
 __pycache__
-/artifacts/*
+/popular_languages/artifacts/*
