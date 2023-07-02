@@ -45,6 +45,7 @@ should be provided like this: '23,43'.
 The rest should be pretty much self-explanatory.
 
 TEST PLAN
+
 Basics
 
 | # |               Test               |
@@ -76,6 +77,7 @@ pytest -m basics -sv --tb long
 ```
 
 THE END
+
 Thanks for giving me a chance! 
 
 Normally when people ask me why I want to work on their
