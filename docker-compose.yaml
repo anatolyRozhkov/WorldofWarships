@@ -8,7 +8,7 @@ services:
       context: ./popular_languages
       dockerfile: popular-languages.dockerfile
     volumes:
-      - .:/app
+      - ./popular_languages:/app
 
   problem-two:
     container_name: engine2d

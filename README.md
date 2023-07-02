@@ -2,8 +2,8 @@ SOLUTION TO THE FIRST PROBLEM
 
 ```
 docker-compose up
-docker exec -it popular_languages bash
-cd popular_languages/ && pytest -sv --tb long --log-path 'artifacts/'
+docker exec -it popular-languages bash
+pytest -sv --tb long --log-path 'artifacts/'
 ```
 
 1) I've modified the exception message a bit to include the 
@@ -23,7 +23,7 @@ the end result as a list of dicts
 
 SOLUTION TO THE SECOND PROBLEM
 
-In first terminal window:
+In second terminal window:
 ```
 sudo apt-get install x11-xserver-utils
 xhost +
@@ -32,10 +32,10 @@ This will allow the container to use your machine's GUI
 This setting resets automatically every time your reload your
 PC, so no worries!
 
-In the second terminal window:
+In second terminal window:
 ```
 docker exec -it engine2d bash
-cd popular_languages/ && python3
+python3
 from engine2d import DrawShapes
 a = DrawShapes()
 ```
@@ -44,8 +44,46 @@ should be provided like this: '23,43'.
 
 The rest should be pretty much self-explanatory.
 
-Super sorry to admit it, but I didn't have the time
-to complete unit tests. Tho I haven't completed the
-task, I've spent so much time
-building the GUI for the engine that I decided to 
-share my solution anyways 😐.
+TEST PLAN
+Basics
+
+| # |               Test               |
+|---|:--------------------------------:|
+| 1 | draw shapes of different colours |
+| 2 |        erase shapes              |
+
+GUI Layout
+
+| # |                    Test                     |
+|---|:-------------------------------------------:|
+| 1 | presence of only expected widgets on page   |
+
+Validation
+
+| # |          Test          |
+|---|:----------------------:|
+| 1 | inputs have validation |
+
+In third terminal window:
+```
+docker exec -it engine2d bash
+pytest -sv --tb long
+```
+If you want to run a specific group of test
+(basics, validation, buttons) do this:
+```
+pytest -m basics -sv --tb long
+```
+
+THE END
+Thanks for giving me a chance! 
+
+Normally when people ask me why I want to work on their
+project things get awkward coz it's a bit hard to come up with
+motivation for building a corporate app that would be 
+used by a select group of bankers or company managers.
+
+With WoW it's really easy to say why I'd like to work with you!
+It's coz you are building a cool game that I've tried 
+and really liked. I keep my fingers crossed that I'll get the chance
+to be part of that project 🍀

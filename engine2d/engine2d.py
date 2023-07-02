@@ -18,6 +18,12 @@ class Engine2D:
         self.drawings = []
         self.fields_and_labels = []
 
+        # primary control buttons (menu, erase, switch color)
+        self.primary_buttons = []
+
+        # current error message
+        self.error_message = None
+
         # control buttons
         self._clean_up_button()
         self._switch_color_button()
@@ -32,6 +38,16 @@ class Engine2D:
         """Creates button for switching colors."""
 
         button = tk.Button(self.window, text="Switch Color", command=self.switch_color)
+
+        # add switch color button to primary buttons if it's not there
+        primary_buttons = []
+        for primary_button in self.primary_buttons:
+            primary_buttons.append(primary_button[1])
+
+        if 'switch color button' not in primary_buttons:
+            self.primary_buttons.append([button, 'switch color button'])
+
+        # draw button
         self.canvas.create_window(self.x_value_for_widgets + 370,
                                   self.y_value_for_widgets + 40, window=button)
 
@@ -53,13 +69,23 @@ class Engine2D:
     def clean_up(self) -> None:
         """Erises all drawings from canvas."""
         for drawing in self.drawings:
-            self.canvas.delete(drawing)
+            self.canvas.delete(drawing[0])
 
         self.drawings = []
 
     def _clean_up_button(self) -> None:
         """Button for wiping up all drawings from the board."""
         button = tk.Button(self.window, text="Wipe up the board", command=self.clean_up)
+
+        # add erase button to primary buttons if it's not there
+        primary_buttons = []
+        for primary_button in self.primary_buttons:
+            primary_buttons.append(primary_button[1])
+
+        if 'erase button' not in primary_buttons:
+            self.primary_buttons.append([button, 'erase button'])
+
+        # draw button
         self.canvas.create_window(self.x_value_for_widgets + 370,
                                   self.y_value_for_widgets, window=button)
 
@@ -69,7 +95,8 @@ class Engine2D:
         draw functions could get values from them"""
 
         for button in self.buttons:
-            self.delete_widget(button)
+            self.delete_widget(button[0])
+        self.buttons = []
 
         # create fields
         field_1 = tk.Entry(self.window)
@@ -82,7 +109,9 @@ class Engine2D:
         label_3 = tk.Label(self.window, text=args[2])
         label_instructions = tk.Label(self.window, text=args[3])
 
-        fields_and_labels = [field_1, field_2, field_3, label_1, label_2, label_3, label_instructions]
+        fields_and_labels = [[field_1, 'field 1'], [field_2, 'field 2'], [field_3, 'field 3'],
+                             [label_1, args[0]], [label_2, args[1]],  [label_3, args[2]],
+                             [label_instructions, args[3]]]
 
         # keep track of those widgets
         for widget in fields_and_labels:
@@ -121,7 +150,7 @@ class Circle(Engine2D):
         button = tk.Button(self.window, text="draw circle", command=self._circle_fields)
 
         # add button to list of button widgets
-        self.buttons.append(button)
+        self.buttons.append([button, 'circle mode button'])
 
         # draw widget
         self.canvas.create_window(self.x_value_for_widgets,
@@ -132,26 +161,53 @@ class Circle(Engine2D):
         button = tk.Button(self.window, text="Draw",
                            command=self.draw_circle)
 
-        self.buttons.append(button)
+        self.buttons.append([button, 'draw circle button'])
 
         self.canvas.create_window(self.x_value_for_widgets - 100, self.y_value_for_widgets, window=button)
 
     def draw_circle(self) -> None:
         """Draw a circle using dimensions provided by user."""
-        x_value = int(self.x.get())
-        y_value = int(self.y.get())
-        radius_value = int(self.radius.get())
+        if type(self.x) == tk.Entry:
+            try:
+                x_value = int(self.x.get())
+                y_value = int(self.y.get())
+                radius_value = int(self.radius.get())
 
-        print(f"Drawing Circle:({x_value}, {y_value}) with radius {radius_value}. Color: {self.color}.")
+                new_drawing = self.canvas.create_oval(x_value - radius_value,
+                                                      y_value - radius_value,
+                                                      x_value + radius_value,
+                                                      y_value + radius_value,
+                                                      outline=self.color)
+                message = f"Drawing Circle:({x_value}, {y_value}) with radius {radius_value}. Color: {self.color}."
+                print(message)
 
-        new_drawing = self.canvas.create_oval(x_value - radius_value,
-                                              y_value - radius_value,
-                                              x_value + radius_value,
-                                              y_value + radius_value,
-                                              outline=self.color)
+                # add this to the list of drawings
+                self.drawings.append([new_drawing, message])
 
-        # add this to the list of drawings
-        self.drawings.append(new_drawing)
+            except (ValueError, TypeError):
+                self.error_message = "Invalid input! Input should be an integer."
+                print(self.error_message)
+
+        else:
+            try:
+                x_value = self.x
+                y_value = self.y
+                radius_value = self.radius
+
+                new_drawing = self.canvas.create_oval(x_value - radius_value,
+                                                      y_value - radius_value,
+                                                      x_value + radius_value,
+                                                      y_value + radius_value,
+                                                      outline=self.color)
+
+                message = f"Drawing Circle:({x_value}, {y_value}) with radius {radius_value}. Color: {self.color}."
+                print(message)
+
+                # add this to the list of drawings
+                self.drawings.append([new_drawing, message])
+            except (ValueError, TypeError):
+                self.error_message = "Invalid input! Input should be an integer."
+                print(self.error_message)
 
     def _circle_fields(self) -> None:
         """Fields where user will specify dimensions for a circle to be drawn."""
@@ -184,7 +240,7 @@ class Triangle(Engine2D):
         button = tk.Button(self.window, text="draw triangle", command=self._triangle_fields)
 
         # add button to button widgets
-        self.buttons.append(button)
+        self.buttons.append([button, 'triangle mode button'])
 
         # draw button
         self.canvas.create_window(self.x_value_for_widgets,
@@ -196,33 +252,61 @@ class Triangle(Engine2D):
                            command=self.draw_triangle)
 
         # keep track of this button
-        self.buttons.append(button)
+        self.buttons.append([button, 'draw triangle button'])
 
         self.canvas.create_window(self.x_value_for_widgets - 100, self.y_value_for_widgets, window=button)
 
     def draw_triangle(self) -> None:
         """Draw a triangle using dimensions provided by user."""
-        # first point
-        x1 = int(self.x1_y1.get().split(',')[0])
-        y1 = int(self.x1_y1.get().split(',')[1])
 
-        # second point
-        x2 = int(self.x2_y2.get().split(',')[0])
-        y2 = int(self.x2_y2.get().split(',')[1])
+        if type(self.x1_y1) == tk.Entry:
 
-        # third point
-        x3 = int(self.x3_y3.get().split(',')[0])
-        y3 = int(self.x3_y3.get().split(',')[1])
+            try:
+                # first point
+                x1 = int(self.x1_y1.get().split(',')[0])
+                y1 = int(self.x1_y1.get().split(',')[1])
 
-        print(f"Drawing Triangle: {x1,y1}, {x2,y2}, {x3,y3}. Color: {self.color}.")
+                # second point
+                x2 = int(self.x2_y2.get().split(',')[0])
+                y2 = int(self.x2_y2.get().split(',')[1])
 
-        # draw polygon
-        new_drawing = self.canvas.create_polygon([x1, y1, x2, y2, x3, y3],
-                                                 outline=self.color,
-                                                 fill=self.color)
+                # third point
+                x3 = int(self.x3_y3.get().split(',')[0])
+                y3 = int(self.x3_y3.get().split(',')[1])
 
-        # add this to the list of drawings
-        self.drawings.append(new_drawing)
+                # draw polygon
+                new_drawing = self.canvas.create_polygon([x1, y1, x2, y2, x3, y3],
+                                                         outline=self.color,
+                                                         fill=self.color)
+
+                message = f"Drawing Triangle: {x1, y1}, {x2, y2}, {x3, y3}. Color: {self.color}."
+                print(message)
+
+                # add this to the list of drawings
+                self.drawings.append([new_drawing, message])
+
+            except (ValueError, TypeError):
+                self.error_message = "Invalid input! Input should be two integers separated by a comma with no space in between. Ex: 23,23"
+                print(self.error_message)
+        else:
+            try:
+                x1, y1 = self.x1_y1
+                x2, y2 = self.x2_y2
+                x3, y3 = self.x3_y3
+
+                # draw polygon
+                new_drawing = self.canvas.create_polygon([x1, y1, x2, y2, x3, y3],
+                                                         outline=self.color,
+                                                         fill=self.color)
+
+                message = f"Drawing Triangle: {x1,y1}, {x2,y2}, {x3,y3}. Color: {self.color}."
+                print(message)
+
+                # add this to the list of drawings
+                self.drawings.append([new_drawing, message])
+            except (ValueError, TypeError):
+                self.error_message = "Invalid input! Input should be two integers separated by a comma with no space in between. Ex: 23,23"
+                print(self.error_message)
 
     def _triangle_fields(self) -> None:
         """Fields where user will specify dimensions for a triangle to be drawn.
@@ -259,7 +343,7 @@ class Rectangle(Engine2D):
         button = tk.Button(self.window, text="draw rectangle", command=self._rectangle_fields)
 
         # add button to list of button widgets
-        self.buttons.append(button)
+        self.buttons.append([button, 'rectangle mode button'])
 
         # draw widget
         self.canvas.create_window(self.x_value_for_widgets,
@@ -271,26 +355,51 @@ class Rectangle(Engine2D):
                            command=self.draw_rectangle)
 
         # keep track of this button
-        self.buttons.append(button)
+        self.buttons.append([button, 'draw rectangle button'])
 
         self.canvas.create_window(self.x_value_for_widgets - 100, self.y_value_for_widgets, window=button)
 
     def draw_rectangle(self) -> None:
         """Draw a rectangle using dimensions provided by user."""
-        # first point
-        x1 = int(self.x1_y1.get().split(',')[0])
-        y1 = int(self.x1_y1.get().split(',')[1])
 
-        # second point
-        x2 = int(self.x2_y2.get().split(',')[0])
-        y2 = int(self.x2_y2.get().split(',')[1])
+        if type(self.x1_y1) == tk.Entry:
 
-        print(f"Drawing Rectangle: {x1, y1}, {x2, y2}. Color: {self.color}.")
+            try:
+                # first point
+                x1 = int(self.x1_y1.get().split(',')[0])
+                y1 = int(self.x1_y1.get().split(',')[1])
 
-        new_drawing = self.canvas.create_rectangle(x1, y1, x2, y2, outline=self.color)
+                # second point
+                x2 = int(self.x2_y2.get().split(',')[0])
+                y2 = int(self.x2_y2.get().split(',')[1])
 
-        # add this to the list of drawings
-        self.drawings.append(new_drawing)
+                new_drawing = self.canvas.create_rectangle(x1, y1, x2, y2, outline=self.color)
+
+                message = f"Drawing Rectangle: {x1, y1}, {x2, y2}. Color: {self.color}."
+                print(message)
+
+                # add this to the list of drawings
+                self.drawings.append([new_drawing, message])
+
+            except (ValueError, TypeError):
+                self.error_message = "Invalid input! Input for required fields should be two integers separated by a comma with no space in between. Ex: 23,23"
+                print(self.error_message)
+
+        else:
+            try:
+                x1, y1 = self.x1_y1
+                x2, y2 = self.x2_y2
+
+                new_drawing = self.canvas.create_rectangle(x1, y1, x2, y2, outline=self.color)
+
+                message = f"Drawing Rectangle: {x1, y1}, {x2, y2}. Color: {self.color}."
+                print(message)
+
+                # add this to the list of drawings
+                self.drawings.append([new_drawing, message])
+            except (ValueError, TypeError):
+                self.error_message = "Invalid input! Input for required fields should be two integers separated by a comma with no space in between. Ex: 23,23"
+                print(self.error_message)
 
     def _rectangle_fields(self) -> None:
         """Fields where user will specify dimensions for a rectangle to be drawn.
@@ -323,6 +432,8 @@ class DrawShapes(Circle, Triangle, Rectangle):
         button = tk.Button(self.window, text="List of Options",
                            command=self.back_to_list_of_options)
 
+        self.primary_buttons.append([button, 'menu button'])
+
         self.canvas.create_window(self.x_value_for_widgets + 370, self.y_value_for_widgets - 40, window=button)
 
     def back_to_list_of_options(self) -> None:
@@ -330,10 +441,12 @@ class DrawShapes(Circle, Triangle, Rectangle):
         Basically return to 'state 1', where you can choose what
         shape you want to draw."""
         for widget in self.fields_and_labels:
-            self.delete_widget(widget)
+            self.delete_widget(widget[0])
+        self.fields_and_labels = []
 
         for button in self.buttons:
-            self.delete_widget(button)
+            self.delete_widget(button[0])
+        self.buttons = []
 
         self._open_circle_fields_button()
         self._open_triangle_fields_button()

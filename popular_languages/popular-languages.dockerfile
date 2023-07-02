@@ -8,11 +8,11 @@ COPY requirements.txt /tmp/requirements.txt
 
 COPY . /app
 
-WORKDIR /app
-
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     apt-get update && \
     /py/bin/pip install -r /tmp/requirements.txt
+
+WORKDIR /app
 
 ENV PATH="/py/bin:$PATH"

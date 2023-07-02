@@ -4,7 +4,7 @@ MAINTAINER Anatoly Rozhkov <anatoly.rozhkov1998@gmail.com>
 
 ENV PYTHONUNBUFFERED 1
 
-COPY ./requirements.txt /tmp/requirements.txt
+COPY requirements.txt /tmp/requirements.txt
 
 COPY . /app
 
